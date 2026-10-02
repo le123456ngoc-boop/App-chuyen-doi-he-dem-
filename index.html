@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bộ Chuyển Đổi Hệ Đếm</title>
+    <!-- Bộ chuyển đổi hệ đếm -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        /* CHUYỂN ĐỔI HỆ ĐẾM TIN HỌC */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15); width: 100%; max-width: 500px; text-align: center; }
+        
+        /* Giữ đúng tiêu đề từ ảnh user gửi */
+        h2 { color: #2e7d32; margin-bottom: 20px; font-size: 24px; }
+        
+        .tabs { display: flex; justify-content: space-between; margin-bottom: 25px; background: #e8f5e9; padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; color: #81c784; cursor: pointer; border-radius: 8px; transition: 0.3s; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .tab-btn.active { background: #4caf50; color: white; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2); }
+        
+        .input-group { margin-bottom: 25px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #388e3c; font-size: 14px; }
+        
+        .input-container { position: relative; }
+        .input-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #81c784; }
+        input { width: 100%; padding: 14px 15px 14px 45px; border: 2px solid #c8e6c9; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; color: #2e7d32; }
+        input:focus { border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }
+        
+        button.btn-convert { width: 100%; padding: 15px; background: #4caf50; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        button.btn-convert:hover { background: #388e3c; }
+        
+        .result-box { margin-top: 25px; padding: 20px; background: #f1f8e9; border-radius: 12px; border-left: 5px solid #4caf50; text-align: left; }
+        .result-title { font-size: 12px; text-transform: uppercase; color: #66bb6a; font-weight: bold; margin-bottom: 8px; }
+        .result-value { font-size: 22px; font-weight: bold; color: #1b5e20; word-break: break-all; letter-spacing: 2px; max-height: 150px; overflow-y: auto; }
+        .note { font-size: 13px; color: #558b2f; margin-top: 8px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>💖 Đổi Hệ Đếm Số 💖</h2>
+    
+    <div class="tabs">
+        <button class="tab-btn active" id="tabDec2Bin" onclick="switchMode('dec2bin')"><i class="fa-solid fa-arrow-down-9-1"></i> Thập phân ➔ Nhị phân</button>
+        <button class="tab-btn" id="tabBin2Dec" onclick="switchMode('bin2dec')"><i class="fa-solid fa-arrow-up-1-0"></i> Nhị phân ➔ Thập phân</button>
+    </div>
+
+    <div class="input-group">
+        <label id="inputLabel">Nhập số thập phân (Chỉ nhập số hệ thập phân):</label>
+        <div class="input-container">
+            <i id="inputIcon" class="fa-solid fa-calculator"></i>
+            <input type="text" id="userInput" placeholder="Ví dụ: -19 hoặc 19">
+        </div>
+    </div>
+
+    <button class="btn-convert" onclick="xuLyChuyenDoi()"><i class="fa-solid fa-bolt"></i> Bắt đầu chuyển đổi</button>
+
+    <div class="result-box">
+        <div class="result-title">Kết quả:</div>
+        <div class="result-value" id="ketQuaDisplay">---</div>
+        <div class="note" id="ghiChu"></div>
+    </div>
+</div>
+
+<script>
+    let mode = 'dec2bin';
+
+    function switchMode(newMode) {
+        mode = newMode;
+        document.getElementById("userInput").value = "";
+        document.getElementById("ketQuaDisplay").innerHTML = "---";
+        document.getElementById("ghiChu").innerHTML = "";
+        
+        let icon = document.getElementById("inputIcon");
+        if (mode === 'dec2bin') {
+            document.getElementById("tabDec2Bin").classList.add("active");
+            document.getElementById("tabBin2Dec").classList.remove("active");
+            document.getElementById("inputLabel").innerHTML = "Nhập số thập phân (Chỉ nhập số hệ thập phân):";
+            document.getElementById("userInput").placeholder = "Ví dụ: -19 hoặc 19";
+            icon.className = "fa-solid fa-calculator";
+        } else {
+            document.getElementById("tabBin2Dec").classList.add("active");
+            document.getElementById("tabDec2Bin").classList.remove("active");
+            document.getElementById("inputLabel").innerHTML = "Nhập chuỗi số nhị phân (Chỉ gồm 0 và 1):";
+            document.getElementById("userInput").placeholder = "Ví dụ: 11101101";
+            icon.className = "fa-solid fa-list-ol";
+        }
+    }
+
+    function isStrictBinary(str) {
+        if (str.length === 0) return false;
+        for (let i = 0; i < str.length; i++) {
+            if (str[i] !== '0' && str[i] !== '1') return false;
+        }
+        return true;
+    }
+
+    function isDigitsWithSign(str) {
+        let cleanStr = str.startsWith("-") ? str.slice(1) : str;
+        if (cleanStr.length === 0) return false;
+        for (let i = 0; i < cleanStr.length; i++) {
+            if (cleanStr[i] < '0' || cleanStr[i] > '9') return false;
+        }
+        return true;
+    }
+
+    // Tính toán số bit chuẩn theo Byte (8, 16, 32, 64...) dựa trên kiến thức trong sách
+    function calculateRequiredBits(bigNum) {
+        let bitsNeeded = 8n;
+        while (true) {
+            let maxPositive = (1n << (bitsNeeded - 1n)) - 1n;
+            let minNegative = -(1n << (bitsNeeded - 1n));
+            if (bigNum >= minNegative && bigNum <= maxPositive) {
+                return Number(bitsNeeded);
+            }
+            bitsNeeded += 8n; // Tăng theo từng Byte (8 bit) giống như sách mô tả
+        }
+    }
+
+    function xuLyChuyenDoi() {
+        let inputVal = document.getElementById("userInput").value.trim();
+        let display = document.getElementById("ketQuaDisplay");
+        let ghiChu = document.getElementById("ghiChu");
+        
+        if (inputVal === "") {
+            display.innerHTML = "⚠️ Chưa nhập số kìaa!";
+            ghiChu.innerHTML = "";
+            return;
+        }
+
+        if (mode === 'dec2bin') {
+            if (!isDigitsWithSign(inputVal)) {
+                display.innerHTML = "❌ Số không hợp lệ!";
+                ghiChu.innerHTML = "";
+                return;
+            }
+
+            try {
+                let bigNum = BigInt(inputVal);
+                let bitLength = calculateRequiredBits(bigNum);
+                let binaryResult = "";
+
+                if (bigNum >= 0n) {
+                    // Số dương: Đổi sang nhị phân và tự động điền thêm số 0 ở đầu cho đủ Byte
+                    binaryResult = bigNum.toString(2).padStart(bitLength, '0');
+                } else {
+                    // Số âm: Mã bù 2 chuẩn xác tuyệt đối = (2^bitLength) + số âm
+                    let totalRange = 1n << BigInt(bitLength);
+                    let twosComplement = totalRange + bigNum;
+                    binaryResult = twosComplement.toString(2).padStart(bitLength, '0');
+                }
+
+                display.innerHTML = binaryResult;
+                ghiChu.innerHTML = "✓ Đã dịch thành công " + bitLength + "-bit (Mã bù 2).";
+            } catch (e) {
+                display.innerHTML = "❌ Lỗi hệ thống khi xử lý!";
+            }
+
+        } else {
+            if (!isStrictBinary(inputVal)) {
+                display.innerHTML = "❌ Nhị phân không hợp lệ!";
+                ghiChu.innerHTML = "Chuỗi nhị phân KHÔNG chứa kí tự khác 0 và 1.";
+                return;
+            }
+
+            try {
+                let bitLength = inputVal.length;
+                let bigDecResult = BigInt("0b" + inputVal);
+
+                // Dựa trên luật trong sách: Kiểm tra bit tận cùng bên trái (bit dấu)
+                // Nếu độ dài chuỗi tương thích và ký tự đầu tiên là '1', hệ thống nhận diện số âm mã bù 2
+                if (inputVal[0] === '1') {
+                    let totalRange = 1n << BigInt(bitLength);
+                    bigDecResult = bigDecResult - totalRange;
+                }
+
+                display.innerHTML = bigDecResult.toString();
+                ghiChu.innerHTML = "✓ Đã dịch thành công " + bitLength + "-bit.";
+            } catch (e) {
+                display.innerHTML = "❌ Lỗi hệ thống khi dịch!";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
